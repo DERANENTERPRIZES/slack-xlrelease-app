@@ -14,6 +14,8 @@ services:
         image: vault
         depends_on:
             - consul
+        ports:
+            - "8200:8200"
         volumes:
             - ./config:/config
             - ./data/consul:/data

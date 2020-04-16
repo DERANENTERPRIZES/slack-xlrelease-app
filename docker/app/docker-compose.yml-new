@@ -13,12 +13,3 @@ services:
         env_file:
           - ../.env
         command: pipenv run gunicorn app:app -b 0.0.0.0:5000 -w 3
-        external_links:
-            - redis:redis
-            - vault:vault
-        networks:
-          - slack-backend-network
-
-networks:
-    slack-backend-network:
-        external: true

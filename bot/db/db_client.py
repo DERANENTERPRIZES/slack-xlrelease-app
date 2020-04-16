@@ -16,6 +16,11 @@ class DBClient(object):
                                               decode_responses=True,
                                               charset="utf-8")
 
+    def testClient( self ):
+        self.redis_client.set("TEST", "XLR-SLACKBOT")
+        self.redis_client.get("TEST")
+        
+
     def get_xl_release_config(self, user_id=None):
         if user_id:
             return self.redis_client.hgetall(name="{}#{}".format(DBClient.CONFIG_CACHE_KEY, user_id))
