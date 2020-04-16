@@ -11,8 +11,8 @@ TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "
 DOCKER_TAG=`git name-rev --tags --name-only $(git rev-parse HEAD)`
 if []${DOCKER_TAG} != "undefined"]
 then
-  echo "docker build -t xebialabsunsupported/slack-xlrelease-app:${DOCKER_TAG} ."
-  echo "docker push xebialabsunsupported/slack-xlrelease-app:${DOCKER_TAG}"
+  docker build -t xebialabsunsupported/slack-xlrelease-app:${DOCKER_TAG} .
+  docker push xebialabsunsupported/slack-xlrelease-app:${DOCKER_TAG}
 fi
-echo "docker build -t xebialabsunsupported/slack-xlrelease-app:latest ."
-echo "docker push xebialabsunsupported/slack-xlrelease-app:latest"
+docker build -t xebialabsunsupported/slack-xlrelease-app:latest .
+docker push xebialabsunsupported/slack-xlrelease-app:latest
