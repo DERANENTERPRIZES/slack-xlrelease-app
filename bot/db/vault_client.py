@@ -31,31 +31,17 @@ class VaultClient(object):
             return "FAILED"
 
     def set_secret(self, path=None, secret=None):
-        data = {}
-        data['value'] = secret
         self.vault_client.write("{}/{}".format(self.BASE_PATH, path), value=secret)
-        fileName = "%s/%s" %  (self.BASE_FILE_PATH, path)
-        f = self.safe_open_w( fileName )
-        f.write( json.dumps( data ) )
-        f.close()
-        os.chmod(fileName , 0o600)
 
     def get_secret(self, path=None):
-        #record = self.vault_client.read("{}/{}".format(self.BASE_PATH, path))
-        fileName = "%s/%s" %  (self.BASE_FILE_PATH, path)
         try:
-            f = open( fileName, "r" )
-            record = json.loads( f.read() )
-            f.close()
-            secret = record["value"] if record else None
-            self.vault_client.write("{}/{}".format(self.BASE_PATH, path), value=secret)
-            #self.logger.info("get_secret %s" % record)
+            record = self.vault_client.read("{}/{}".format(self.BASE_PATH, path))
         except:
             self.logger.error("Secret for %s/%s MISSING" % ( self.BASE_PATH, path ))
             self.set_secret( path=path, secret="" )
             record = ""
-        #return record["data"]["value"] if record else None
-        return record["value"] if record else None
+        return record["data"]["value"] if record else None
+        #return record["value"] if record else None
 
     def mkdir_p(self, path):
         try:
