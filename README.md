@@ -1,3 +1,13 @@
+## CI status
+
+[![Docker Hub][slack-xlreleaase-app-docker-hub-image] ][slack-xlreleaase-app-docker-hub-url]
+[![License: MIT][slack-xlreleaase-app-license-image] ][slack-xlreleaase-app-license-url]
+
+
+[slack-xlreleaase-app-docker-hub-image]: https://img.shields.io/badge/docker-ready-blue.svg
+[slack-xlreleaase-app-docker-hub-url]: https://registry.hub.docker.com/repository/docker/xebialabsunsupported/slack-xlrelease-app
+[slack-xlreleaase-app-license-image]: https://img.shields.io/badge/License-MIT-yellow.svg
+[slack-xlreleaase-app-license-url]: https://opensource.org/licenses/MIT
 # Preface
 
 This document describes the slack-xlrelease-app implementation.
