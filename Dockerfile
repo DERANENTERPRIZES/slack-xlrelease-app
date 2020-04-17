@@ -1,4 +1,4 @@
-FROM python:3.7.2-alpine
+FROM python
 
 ENV APP_ROOT=/opt/xebialabs
 ENV APP_HOME=${APP_ROOT}/slack-xlrelease-app
@@ -14,6 +14,8 @@ WORKDIR ${APP_HOME}
 RUN mkdir log
 
 RUN pip install pipenv && \
+    pip install --upgrade pip && \
+    pip install jinja2 flask pyyaml slackclient slackeventsapi redis hvac polling && \
     pipenv install
 
 EXPOSE 5000

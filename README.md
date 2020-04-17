@@ -1,8 +1,18 @@
+## CI status
+
+[![Docker Hub][slack-xlreleaase-app-docker-hub-image] ][slack-xlreleaase-app-docker-hub-url]
+[![License: MIT][slack-xlreleaase-app-license-image] ][slack-xlreleaase-app-license-url]
+
+
+[slack-xlreleaase-app-docker-hub-image]: https://img.shields.io/badge/docker-ready-blue.svg
+[slack-xlreleaase-app-docker-hub-url]: https://registry.hub.docker.com/repository/docker/xebialabsunsupported/slack-xlrelease-app
+[slack-xlreleaase-app-license-image]: https://img.shields.io/badge/License-MIT-yellow.svg
+[slack-xlreleaase-app-license-url]: https://opensource.org/licenses/MIT
 # Preface
 
 This document describes the slack-xlrelease-app implementation.
 
-See the *XL Release Reference Manual* and link:https://api.slack.com/slack-apps[*Building Slack App*] for background information on XL Release and Slack App.
+See the *XL Release Reference Manual* and [*Building Slack App*](https://api.slack.com/slack-apps) for background information on XL Release and Slack App.
 
 # Overview
 
@@ -10,7 +20,7 @@ A slack app to create and track releases from Slack. This slack app will allow u
 
 ## Installation
 
-This slack app uses link:https://www.vaultproject.io/[Vault] backed by link:https://www.consul.io/[Consul] to store secrets. It also uses link:https://redis.io/[Redis] as a database and cache.
+This slack app uses [Vault](https://www.vaultproject.io/) backed by [Consul](https://www.consul.io/) to store secrets. It also uses [Redis](https://redis.io/) as a database and cache.
 
 You can use `docker/infra/docker-compose.yml` to spin up vault, consul, and redis.
 
@@ -45,17 +55,17 @@ To clean up everything, follow below steps.
 
 Now, we have to create slack app for XL Release.
 
-* Visit link:https://api.slack.com/apps[Slack Apps] and click on *Create New App*
+* Visit [Slack Apps](https://api.slack.com/apps) and click on *Create New App*
 
-image::images/slack_apps_page.png[]
+![slack_apps_page](images/slack_apps_page.png)
 
 * Add app name as *XL Release* and choose your development slack workspace.
 
-image::images/create_new_app.png[]
+![create_new_app](images/create_new_app.png)
 
-* Once the new app is created, visit Basic information page and copy value of *Client ID*, *Client Secret*, and *Signing Secret* in `docker/.env` file. You can also customise icon for your Slack app from Display information page.
+* Once the new app is created, visit Basic information page and copy value of *Client ID*, *Client Secret*, and *Signing Secret* in `docker/.env` file. You can also customize icon for your Slack app from Display information page.
 
-image::images/basic_information.png[]
+![basic_information](images/basic_information.png)
 
 ### Start Slack XL Release Bot
 
@@ -69,11 +79,11 @@ docker-compose up
 
 This will start slack bot on port 5000. However it is required to open tunnel to internet to communicate to slack app.
 
-To do that, use link:https://ngrok.com[ngrok] or setup reverse proxy using nginx or apache.
+To do that, use [ngrok](https://ngrok.com) or setup reverse proxy using nginx or apache.
 
 To use ngrok, run `ngrok http 5000` to open tunnel and copy the url which will be used to configure slack app.
 
-image::images/ngrok_example.png[]
+![ngrok_example](images/ngrok_example.png)
 
 
 ### Configure features for your slack app
@@ -82,45 +92,45 @@ image::images/ngrok_example.png[]
 
 Click on *Bot Users* link from slack app configuration page and add username for your bot.
 
-image::images/bot_user.png[]
+![bot_user](images/bot_user.png)
 
 #### Configure interactive components
 
 Click on *Interactive Components* link and add interactivity url.
 
-image::images/interactive_components.png[]
+![interactive_components](images/interactive_components.png)
 
 #### Add slash command
 
 Click on *Slash Commands* link and add new slash command as below.
 
-image::images/slash_command.png[]
-image::images/add_slash_command.png[]
+![slash_command](images/slash_command.png)
+![add_slash_command](images/add_slash_command.png)
 
 #### Add events
 
 Click on *Event Subscriptions* link and enable events. Add Request URL for events. Subscribe to _message.im_ event.
 
-image::images/event_subscription.png[]
+![event_subscription](images/event_subscription.png)
 
 #### Add scope and permissions
 
 Click on *OAuth & Permissions* link and add redirect url to thanks page. Also add scopes shown in below image.
 
-image::images/oauth_permission.png[]
+![oauth_permission](images/oauth_permission.png)
 
 ### Install App in your workspace
 
 To add slack app to your slack workspace, open bot url in web browser and click on _Add to Slack_ button and authorize the changes.
 
-image::images/slack_bot_url.png[]
+![slack_bot_url](images/slack_bot_url.png)
 
 
 # How to Use
 
 Once installed, you can see _XL Release_ in apps section.
 
-image::images/app_installed.png[]
+![app_installed](images/app_installed.png)
 
 Below commands can be used with this app.
 
@@ -138,19 +148,19 @@ Enter below command in XL Release App Channel (You can use any channel) to confi
 
 You will get message shown in below screenshot if connection is successful.
 
-image::images/connection_success.png[]
+![connection_success](images/connection_success.png)
 
 ### Create release from Slack
 
 Use `/xlrelease create` command to create a new release from Slack. You will get a list of templates (based on access rights) to choose from.
 
-image::images/template_list.png[]
+![template_list](images/template_list.png)
 
 Select any template and enter name for your release. Release will be create and it will show task which are in progress.
 
-image::images/create_release_dialog.png[]
+![create_release_dialog](images/create_release_dialog.png)
 
-image::images/release_tracking.png[]
+![release_tracking](images/release_tracking.png)
 
 Note: _If release template requires other input variables, it will be shown with create release dialog. Right now only string type of variables are supported due to slack limitation._
 
@@ -158,7 +168,7 @@ You can now assign task to your self, complete the task, fail the task, skip the
 
 As release progresses, updated notifications are sent to slack channel.
 
-image::images/updated_tasks.png[]
+![updated_tasks](images/updated_tasks.png)
 
 ### Track release from Slack
 

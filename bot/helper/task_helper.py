@@ -1,4 +1,5 @@
 import json
+import logging
 
 from bot.dialogs.task_action_dialog import get_task_action_dialog
 from bot.helper import Helper
@@ -9,6 +10,7 @@ from bot.messages.task_messages import get_task_messages
 class TaskHelper(Helper):
 
     def __init__(self, slack_client=None, db_client=None, vault_client=None):
+        self.logger = logging.getLogger(__name__)
         super(TaskHelper, self).__init__(slack_client=slack_client, db_client=db_client, vault_client=vault_client)
 
     def assign_to_me_action(self, user=None, channel=None, task_id=None, ts=None):
@@ -30,11 +32,11 @@ class TaskHelper(Helper):
                                         task_type=task_type,
                                         all_user_config_meta=all_user_config_meta,
                                         base_url=base_url)
-            self.slack_client.update_message(
-                channel=channel["id"],
-                ts=ts,
-                kwargs=message
-            )
+            message['channel'] = channel["id"]
+            message["ts"] = ts
+            message['token'] = self.vault_client.get_secret(path="access_token")
+            self.logger.info("assign_to_me_action -> message = %s" % json.dumps(message, indent=4, sort_keys=True) )
+            self.slack_client.update_message(message=message)
 
     def show_task_action_dialog(self, user=None, trigger_id=None, task_id=None, task_action=None):
         xl_release = super(TaskHelper, self).get_xl_release(user_id=user["id"])

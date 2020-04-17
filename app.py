@@ -1,8 +1,10 @@
 import json
 import logging
 import jinja2
-from flask import Flask, render_template, request, make_response
+import os
+from flask import Flask, render_template, request, make_response, redirect, url_for
 from slackeventsapi import SlackEventAdapter
+from bot.db.vault_client import VaultClient
 
 from bot import setup_logging
 from bot.xl_release_bot import XLReleaseBot
@@ -25,15 +27,38 @@ template_loader = jinja2.ChoiceLoader([
 ])
 events_adapter.server.jinja_loader = template_loader
 
+@app.route("/sysconfig", methods=["GET", "POST"])
+def sysconfig():
+    vault_url = os.environ.get("VAULT_URL")
+    vault_token = os.environ.get("VAULT_TOKEN")
+    vault_client = VaultClient(url=vault_url, token=vault_token)
+
+    access_token = vault_client.get_secret(path="access_token")
+    bot_token = vault_client.get_secret(path="bot_token")
+    polling_time = int(os.environ.get("POLLING_TIME"))
+
+    redisTest = xl_release_bot.testRedis()
+    vaultTest = vault_client.testVault()
+
+    return render_template("sysconfig.html",
+                            access_token=access_token,
+                            bot_token=bot_token,
+                            vaultTest=vaultTest,
+                            redisTest=redisTest)
+
 
 @app.route("/install", methods=["GET"])
 def before_install():
     """
     This route renders an installation page for our app!
     """
+    logger.info("before_install -> START")
     client_id = xl_release_bot.oauth["client_id"]
     scope = xl_release_bot.oauth["scope"]
     state = xl_release_bot.new_state()
+    logger.info("Install -> client_id = %s" % client_id)
+    logger.info("Install -> scope     = %s" % scope)
+    logger.info("Install -> state     = %s" % state)
     return render_template("install.html", client_id=client_id, scope=scope, state=state)
 
 
@@ -44,10 +69,14 @@ def thanks():
     """
     auth_code = request.args.get('code')
     state = request.args.get('state')
+    logger.info("thanks -> Code = %s | State = %s" % (auth_code, state ))
     success = xl_release_bot.auth(code=auth_code, state=state)
+    logger.info("thanks -> Success = %s " % ( success ))
     if success:
+        logger.info("thanks -> SUCCESS")
         return render_template("thanks.html")
     else:
+        logger.info("thanks -> FAIL")
         return before_install()
 
 
@@ -83,6 +112,7 @@ def handle_message(event_data):
 @app.route("/actions", methods=["GET", "POST"])
 def respond():
     slack_payload = json.loads(request.form.get("payload"))
+    logger.debug("actions -> slack_payload = %s" % ( slack_payload ))
     callback_id = slack_payload["callback_id"]
     if callback_id == "create-release-dialog":
         xl_release_bot.handle_template_callback(request_form=request.form)

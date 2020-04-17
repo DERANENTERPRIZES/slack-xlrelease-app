@@ -19,6 +19,6 @@ services:
         networks:
           - slack-backend-network
 
-networks:
-    slack-backend-network:
-        external: true
+#networks:
+#    slack-backend-network:
+#        external: true

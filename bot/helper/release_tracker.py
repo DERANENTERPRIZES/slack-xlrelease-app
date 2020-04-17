@@ -25,13 +25,22 @@ class ReleaseTracker(Helper):
         xl_release = super(ReleaseTracker, self).get_xl_release(user_id=user_id)
         releases = xl_release.get_releases()
         message = get_releases_message(releases=releases)
-        self.slack_client.post_message(channel=channel_id,
-                                       kwargs=message)
+        message['channel'] = channel_id
+        message['token'] = self.vault_client.get_secret(path="access_token")
+        self.logger.info("show_releases -> releases = %s" % message)
+        if "text" not in message:
+            message['text'] = "Release List"
+            #if "attachments" in message:
+            #    message['title'] = message["attachments"][0]["title"]
+            #    message['text'] = message["attachments"][0]["text"]
+            #    message['color'] = message["attachments"][0]["color"]
+        self.slack_client.post_message(message=message)
 
     def send_release_track_message(self, user=None, channel=None, release_id=None, ts=None):
         xl_release = super(ReleaseTracker, self).get_xl_release(user_id=user["id"])
         release_data = xl_release.get_release(release_id)
-        user_profile = self.slack_client.get_user_profile(user_id=user["id"])
+        token = self.vault_client.get_secret(path="access_token")
+        user_profile = self.slack_client.get_user_profile(token=token, user_id=user["id"])
         config_meta = self.db_client.get_xl_release_config(user_id=user["id"])
         base_url = config_meta["xl_release_url"]
         message = get_release_tracking_message(username=user["name"],
@@ -39,9 +48,13 @@ class ReleaseTracker(Helper):
                                                base_url=base_url,
                                                profile=user_profile)
 
-        slack_response = self.slack_client.update_message(channel=channel["id"],
-                                                          ts=ts,
-                                                          kwargs=message)
+        message['channel'] = channel["id"]
+        message['token'] = token
+        message["ts"] = ts
+        if "text" not in message:
+            message["text"] = "Release Message"
+        self.logger.info("assign_to_me_action -> message = %s" % json.dumps(message, indent=4, sort_keys=True) )
+        slack_response = self.slack_client.update_message(message=message)
 
         release_meta = {
             "user": json.dumps(user),
@@ -131,8 +144,11 @@ class ReleaseTracker(Helper):
                                     base_url=base_url)
 
         if task["id"] not in known_active_tasks:
-            result = self.slack_client.post_message(channel=channel["id"],
-                                                    kwargs=message)
+            message['channel'] = channel['id']
+            message['token'] = self.vault_client.get_secret(path="access_token")
+            if "text" not in message:
+                message["text"] = "Task Message"
+            result = self.slack_client.post_message(message=message)
             known_active_tasks[task["id"]] = {
                 "ts": result["ts"],
                 "status": task["status"]
@@ -140,9 +156,13 @@ class ReleaseTracker(Helper):
         elif task["id"] in known_active_tasks and \
                 known_active_tasks[task["id"]]["status"] != task["status"]:
             self.slack_client.delete_message(channel=channel["id"],
-                                             ts=known_active_tasks[task["id"]]["ts"])
-            result = self.slack_client.post_message(channel=channel["id"],
-                                                    kwargs=message)
+                                             ts=known_active_tasks[task["id"]]["ts"],
+                                             token=self.vault_client.get_secret(path="access_token") )
+            message['channel'] = channel["id"]
+            message['token'] = self.vault_client.get_secret(path="access_token")
+            if "text" not in message:
+                message["text"] = "Task Message"
+            result = self.slack_client.post_message(message=message)
             known_active_tasks[task["id"]]["ts"] = result["ts"]
             known_active_tasks[task["id"]]["status"] = task["status"]
 
@@ -155,9 +175,12 @@ class ReleaseTracker(Helper):
         release_meta = self.db_client.get_release_meta(release_id=release_id)
         message = get_updated_tracking_message(message=json.loads(release_meta["message"]),
                                                release_data=release_data)
-        self.slack_client.update_message(channel=channel["id"],
-                                         ts=release_meta["ts"],
-                                         kwargs=message)
+        message['channel'] = channel["id"]
+        message["ts"] = release_meta["ts"]
+        message['token'] = self.vault_client.get_secret(path="access_token")
+        if "text" not in message:
+            message["text"] = "Update Message"
+        self.slack_client.update_message(message=message)
 
     def __track_release_completed_status(self, user=None, channel=None, release_id=None):
         xl_release = super(ReleaseTracker, self).get_xl_release(user_id=user["id"])
@@ -165,15 +188,17 @@ class ReleaseTracker(Helper):
         if release_data["status"] in ["COMPLETED", "ABORTED"]:
             config_meta = self.db_client.get_xl_release_config(user_id=user["id"])
             base_url = config_meta["xl_release_url"]
-            user_profile = self.slack_client.get_user_profile(user_id=user["id"])
+            token = self.vault_client.get_secret(path="access_token")
+            user_profile = self.slack_client.get_user_profile(token=token, user_id=user["id"])
             message = get_release_completed_message(username=user["name"],
                                                     base_url=base_url,
                                                     release_data=release_data,
                                                     profile=user_profile)
-            self.slack_client.post_message(
-                channel=channel["id"],
-                kwargs=message
-            )
+            message['channel'] = channel["id"]
+            message['token'] = token
+            if "text" not in message:
+                message["text"] = "Release Completed"
+            self.slack_client.post_message(message=message)
             all_user_config_meta = self.db_client.get_xl_release_config()
             known_active_tasks = self.db_client.get_release_task_meta(release_id=release_id)
             self.__handle_known_active_tasks(channel=channel, xl_release=xl_release,

@@ -12,4 +12,4 @@ listener "tcp" {
 disable_mlock = true
 
 #Parameter to enable Vault UI
-#ui = true
+ui = true
