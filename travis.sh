@@ -9,7 +9,7 @@ TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d "
 " https://hub.docker.com/v2/users/login/ | jq -r .token)
 
 DOCKER_TAG=`git name-rev --tags --name-only $(git rev-parse HEAD)`
-if [${DOCKER_TAG} != "undefined"]
+if ["${DOCKER_TAG}" != "undefined"]
 then
   docker build -t xebialabsunsupported/slack-xlrelease-app:${DOCKER_TAG} .
   docker push xebialabsunsupported/slack-xlrelease-app:${DOCKER_TAG}
